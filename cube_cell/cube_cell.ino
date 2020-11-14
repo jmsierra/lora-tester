@@ -1,6 +1,8 @@
+
 #include "LoRaWan_APP.h"
 #include "Arduino.h"
 #include "cubecell_SH1107Wire.h"
+#include "lora_details.h"
 
 /*
  * set LoraWan_RGB to 1,the RGB active
@@ -13,25 +15,6 @@
 
 extern SH1107Wire  display; 
 
-#define RF_FREQUENCY                                868000000 // Hz
-
-#define TX_OUTPUT_POWER                             14        // dBm
-
-#define LORA_BANDWIDTH                              0         // [0: 125 kHz,
-                                                              //  1: 250 kHz,
-                                                              //  2: 500 kHz,
-                                                              //  3: Reserved]
-#define LORA_SPREADING_FACTOR                       7         // [SF7..SF12]
-#define LORA_CODINGRATE                             1         // [1: 4/5,
-                                                              //  2: 4/6,
-                                                              //  3: 4/7,
-                                                              //  4: 4/8]
-#define LORA_PREAMBLE_LENGTH                        8         // Same for Tx and Rx
-#define LORA_SYMBOL_TIMEOUT                         0         // Symbols
-#define LORA_FIX_LENGTH_PAYLOAD_ON                  false
-#define LORA_IQ_INVERSION_ON                        false
-
-
 #define RX_TIMEOUT_VALUE                            1000
 #define BUFFER_SIZE                                 32 // Define the payload size here
 
@@ -39,14 +22,6 @@ char txpacket[BUFFER_SIZE];
 char rxpacket[BUFFER_SIZE];
 
 static RadioEvents_t RadioEvents;
-void OnTxDone( void );
-void OnTxTimeout( void );
-void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr );
-void displayInof();
-void sleep(void);
-void testRGB(void);
-void userKey(void);
-
 typedef enum
 {
     LOWPOWER,
@@ -136,74 +111,4 @@ void loop()
       break;
   }
     Radio.IrqProcess( );
-}
-
-void OnTxDone( void )
-{
-  Serial.print("TX done......");
-  displayInof();
-  turnOnRGB(0,0);
-  state=RX;
-}
-
-void OnTxTimeout( void )
-{
-    Radio.Sleep( );
-    Serial.print("TX Timeout......");
-    //state=TX;
-}
-void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr )
-{
-    Rssi=rssi;
-    rxSize=size;
-    memcpy(rxpacket, payload, size );
-    rxpacket[size]='\0';
-    turnOnRGB(0x001000,100);
-    turnOnRGB(0,0);
-    Radio.Sleep( );
-
-    Serial.printf("\r\nreceived packet \"%s\" with rssi %d , length %d\r\n",rxpacket,Rssi,rxSize);
-    Serial.println("wait to send next packet");
-    displayInof();
-
-    state=TX;
-}
-
-void displayInof()
-{
-    display.clear();
-    display.drawString(0, 0,  "Received Size" + String(rxSize,DEC) + " packages:");
-    display.drawString(0, 15, rxpacket);
-    display.drawString(0, 30, "With rssi " + String(Rssi,DEC));
-    display.drawString(0, 50, "Packet " + String(txNumber,DEC) + " sent done");
-    display.display();
-}
-
-
-void userKey(void)
-{
-  delay(10);
-  if(digitalRead(P3_3)==0)
-  {
-    sleepMode = true;
-  }
-}
-
-void testRGB(void)
-{
-  display.drawString(0, 20, "RGB Testing");
-  display.display();
-  for(uint32_t i=0;i<=30;i++)
-  {
-    turnOnRGB(i<<16,10);
-  }
-  for(uint32_t i=0;i<=30;i++)
-  {
-    turnOnRGB(i<<8,10);
-  }
-  for(uint32_t i=0;i<=30;i++)
-  {
-    turnOnRGB(i,10);
-  }
-  turnOnRGB(0,0);
 }
