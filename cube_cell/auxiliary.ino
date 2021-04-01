@@ -1,4 +1,6 @@
-
+/*
+ * Test RGB LED
+ */
 void testRGB(void){
   display.drawString(0, 20, "RGB Testing");
   display.display();
@@ -28,6 +30,7 @@ void OnTxTimeout( void )
     Serial.print("TX Timeout......");
     //state=TX;
 }
+
 void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr )
 {
     Rssi=rssi;
@@ -61,6 +64,6 @@ void userKey(void)
   delay(10);
   if(digitalRead(P3_3)==0)
   {
-    sleepMode = true;
+    state = TX;
   }
 }

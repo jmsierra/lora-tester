@@ -43,14 +43,16 @@ void setup() {
     digitalWrite(Vext, LOW); 
     delay(100);
     display.init();
-    //display.flipScreenVertically();
     
     testRGB();
     txNumber=0;
     Rssi=0;
 
+    // Setup USER button
     pinMode(P3_3,INPUT);
     attachInterrupt(P3_3,userKey,FALLING);
+
+    // Setup LORA
     RadioEvents.TxDone = OnTxDone;
     RadioEvents.TxTimeout = OnTxTimeout;
     RadioEvents.RxDone = OnRxDone;
@@ -67,6 +69,7 @@ void setup() {
                                    LORA_SYMBOL_TIMEOUT, LORA_FIX_LENGTH_PAYLOAD_ON,
                                    0, true, 0, 0, LORA_IQ_INVERSION_ON, true );
 
+    // Initialize status in mode TX
     state=TX;
 }
 
@@ -74,11 +77,12 @@ void setup() {
 
 void loop()
 {
-  switch(state)
-  {
+  switch(state){
     case TX:
       delay(1000);
       txNumber++;
+
+      // Concatenate message
       sprintf(txpacket,"%s","hello");
       sprintf(txpacket+strlen(txpacket),"%d",txNumber);
       sprintf(txpacket+strlen(txpacket),"%s"," rssi : ");
@@ -96,8 +100,7 @@ void loop()
       state=LOWPOWER;
       break;
     case LOWPOWER:
-      if(sleepMode)
-      {
+      if(sleepMode){
         Radio.Sleep( );
         display.stop();
         detachInterrupt(RADIO_DIO_1);
