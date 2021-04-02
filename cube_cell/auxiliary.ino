@@ -35,7 +35,7 @@ void testRGB(void){
 
 void OnTxDone( void )
 {
-  turnOnRGB(Color(0, 255, 0),100);
+  turnOnRGB(0x100000,100);
   Serial.println("TX done......");
   displayInof();
   turnOnRGB(0,0);
