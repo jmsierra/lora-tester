@@ -35,7 +35,6 @@ bool sleepMode = false;
 int16_t Rssi,rxSize;
 
 
-
 void setup() {
     boardInitMcu( );
     Serial.begin(115200);
@@ -79,19 +78,17 @@ void loop()
 {
   switch(state){
     case TX:
-      delay(1000);
+      delay(5000);
+      Serial.println("Starting TX"); 
       txNumber++;
 
-      // Concatenate message
-      sprintf(txpacket,"%s","hello");
-      sprintf(txpacket+strlen(txpacket),"%d",txNumber);
-      sprintf(txpacket+strlen(txpacket),"%s"," rssi : ");
-      sprintf(txpacket+strlen(txpacket),"%d",Rssi);
-      turnOnRGB(0x100000,0);
+      // Compose message
+      sprintf(txpacket,"M:%d,rssi:%d", txNumber, Rssi);
 
+      // Send message
       Serial.printf("\r\nsending packet \"%s\" , length %d\r\n",txpacket, strlen(txpacket));
-
       Radio.Send( (uint8_t *)txpacket, strlen(txpacket) );
+      
       state=LOWPOWER;
       break;
     case RX:
@@ -113,5 +110,6 @@ void loop()
     default:
       break;
   }
-    Radio.IrqProcess( );
+  
+  Radio.IrqProcess( );
 }

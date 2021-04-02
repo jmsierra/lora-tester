@@ -2,33 +2,53 @@
  * Test RGB LED
  */
 void testRGB(void){
+  Serial.println("Testing RGB...");
+  
+  // Display Testing
+  display.clear();
   display.drawString(0, 20, "RGB Testing");
   display.display();
+  
   for(uint32_t i=0;i<=30;i++){
-    turnOnRGB(i<<16,10);
+    // Red
+    turnOnRGB(i<<16,15);
   }
   for(uint32_t i=0;i<=30;i++){
-    turnOnRGB(i<<8,10);
+    // Green
+    turnOnRGB(i<<8,15);
   }
   for(uint32_t i=0;i<=30;i++){
-    turnOnRGB(i,10);
+    // Blue
+    turnOnRGB(i,15);
   }
+
+  // Sleep 0.5s
+  delay(500);
+
+  // Clear display
+  display.clear();
+  display.display();
+
+  // Switch RGB off
   turnOnRGB(0,0);
 }
 
 void OnTxDone( void )
 {
-  Serial.print("TX done......");
+  turnOnRGB(Color(0, 255, 0),100);
+  Serial.println("TX done......");
   displayInof();
   turnOnRGB(0,0);
-  state=RX;
+  state = TX;
 }
 
 void OnTxTimeout( void )
 {
     Radio.Sleep( );
-    Serial.print("TX Timeout......");
-    //state=TX;
+    turnOnRGB(0x100000,100);
+    Serial.println("TX Timeout......");
+    turnOnRGB(0,0);
+    state = TX;
 }
 
 void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr )
